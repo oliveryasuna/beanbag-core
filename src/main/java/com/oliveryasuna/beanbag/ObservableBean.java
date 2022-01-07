@@ -18,9 +18,6 @@
 
 package com.oliveryasuna.beanbag;
 
-import java.util.Objects;
-import java.util.function.Function;
-
 public abstract class ObservableBean<T, SUB extends ObservableBean<T, SUB>> {
 
   // Constructors
@@ -36,19 +33,6 @@ public abstract class ObservableBean<T, SUB extends ObservableBean<T, SUB>> {
   //--------------------------------------------------
 
   protected T bean;
-
-  // Copying methods
-  //--------------------------------------------------
-
-  protected abstract void copy(T source);
-
-  public <I> void copy(final ObservableBean<I, ?> source, final Function<I, T> mapper) {
-    copy(Objects.requireNonNull(mapper).apply(Objects.requireNonNull(source).getBean()));
-  }
-
-  public void copy(final ObservableBean<T, ?> source) {
-    copy(source, t -> t);
-  }
 
   // Getters/setters
   //--------------------------------------------------
