@@ -16,70 +16,41 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.oliveryasuna.beanbag;
+package com.oliveryasuna.beanbag.event;
 
-import com.oliveryasuna.beanbag.event.BeanChangedEvent;
-import com.oliveryasuna.beanbag.listener.BeanChangedListener;
-import com.oliveryasuna.commons.language.pattern.registry.Registration;
-import org.apache.commons.lang3.event.EventListenerSupport;
+import com.oliveryasuna.beanbag.ObservableBean;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public abstract class ObservableBean<T, SUB extends ObservableBean<T, SUB>> {
+public class BeanChangedEvent<T, SRC extends ObservableBean<T, SRC>> extends BeanEvent<T, SRC> {
 
   // Constructors
   //--------------------------------------------------
 
-  protected ObservableBean(final T bean) {
+  public BeanChangedEvent(final T newBean, final T oldBean, final SRC source) {
+    super(source);
 
-    super();
-
-    this.bean = bean;
+    this.newBean = newBean;
+    this.oldBean = oldBean;
   }
 
-  // Bean field
+  // Fields
   //--------------------------------------------------
 
-  protected T bean;
+  private final T newBean;
 
-  // Listener registries
-  //--------------------------------------------------
-
-  protected final EventListenerSupport<BeanChangedListener> beanChangedListeners = EventListenerSupport.create(BeanChangedListener.class);
-
-  // Listener registration methods
-  //--------------------------------------------------
-
-  protected Registration addBeanChangedListener(final BeanChangedListener<T, SUB> listener) {
-    beanChangedListeners.addListener(listener);
-
-    return (() -> removeBeanChangedListener(listener));
-  }
-
-  protected void removeBeanChangedListener(final BeanChangedListener<T, SUB> listener) {
-    beanChangedListeners.removeListener(listener);
-  }
-
-  // Listener dispatch methods
-  //--------------------------------------------------
-
-  protected void fireBeanChangedEvent(final T newBean, final T oldBean) {
-    beanChangedListeners.fire().beanChanged(new BeanChangedEvent<>(newBean, oldBean, (SUB)this));
-  }
+  private final T oldBean;
 
   // Getters/setters
   //--------------------------------------------------
 
-  protected T getBean() {
-    return bean;
+  public T getNewBean() {
+    return newBean;
   }
 
-  protected void setBean(final T bean) {
-    final T oldBean = this.bean;
-
-    this.bean = bean;
-
-    if(bean != oldBean) {
-      fireBeanChangedEvent(bean, oldBean);
-    }
+  public T getOldBean() {
+    return oldBean;
   }
 
   // Object methods
@@ -88,24 +59,33 @@ public abstract class ObservableBean<T, SUB extends ObservableBean<T, SUB>> {
   @Override
   public boolean equals(final Object other) {
     if(this == other) return true;
+    if(other == null || getClass() != other.getClass()) return false;
 
-    if(getClass().isAssignableFrom(other.getClass())) {
-      return getBean().equals(((ObservableBean<?, ?>)other).getBean());
-    } else if(getBean().getClass().isAssignableFrom(other.getClass())) {
-      return getBean().equals(other);
-    }
+    final BeanChangedEvent<?, ?> otherCasted = (BeanChangedEvent<?, ?>)other;
 
-    return false;
+    return new EqualsBuilder()
+        .appendSuper(super.equals(other))
+        .append(getNewBean(), otherCasted.getNewBean())
+        .append(getOldBean(), otherCasted.getOldBean())
+        .isEquals();
   }
 
   @Override
   public int hashCode() {
-    return getBean().hashCode();
+    return new HashCodeBuilder(17, 37)
+        .appendSuper(super.hashCode())
+        .append(getNewBean())
+        .append(getOldBean())
+        .toHashCode();
   }
 
   @Override
   public String toString() {
-    return getBean().toString();
+    return new ToStringBuilder(this)
+        .appendSuper(super.toString())
+        .append("newBean", getNewBean())
+        .append("oldBean", getOldBean())
+        .toString();
   }
 
 }
