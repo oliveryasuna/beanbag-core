@@ -48,10 +48,10 @@
         ==== Miscellaneous
         =========================-->
 
-        <!-- Commons Lang. -->
+        <!-- Oliver's Commons Language. -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <groupId>com.oliveryasuna.commons</groupId>
+            <artifactId>commons-language</artifactId>
         </dependency>
     </dependencies>
 
